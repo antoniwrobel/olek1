@@ -1,21 +1,24 @@
 import type { LoaderFunction } from "@remix-run/node";
 import { json } from "@remix-run/node";
 import { Form, Link, NavLink, Outlet, useLoaderData } from "@remix-run/react";
-import { useUser } from "~/utils";
+import { useOptionalUser, useUser } from "~/utils";
 import { getItemsList } from "~/models/item.server";
+import { requireUserId } from "~/session.server";
 
 type LoaderData = {
   itemsList: Awaited<ReturnType<typeof getItemsList>>;
 };
 
-export const loader: LoaderFunction = async () => {
+export const loader: LoaderFunction = async ({ request }) => {
+  await requireUserId(request);
+
   const itemsList = await getItemsList();
   return json<LoaderData>({ itemsList });
 };
 
 export default function NotesPage() {
   const data = useLoaderData() as LoaderData;
-  const user = useUser();
+  const user = useOptionalUser();
 
   return (
     <div className="flex h-full min-h-screen flex-col">
@@ -23,7 +26,7 @@ export default function NotesPage() {
         <h1 className="text-3xl font-bold">
           <Link to="/">Items</Link>
         </h1>
-        <p>{user.email}</p>
+        <p>{user?.email}</p>
         <Form action="/logout" method="post">
           <button
             type="submit"

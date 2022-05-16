@@ -1,12 +1,83 @@
-import { Link } from "@remix-run/react";
+import { User } from "@prisma/client";
+import { ActionFunction } from "@remix-run/node";
+import { Form, Link } from "@remix-run/react";
+import { createUserSession } from "~/session.server";
 
 import { useOptionalUser } from "~/utils";
+
+type LoginAsType = "Admin" | "User";
+
+export const action: ActionFunction = async ({ request }) => {
+  const formData = await request.formData();
+  const action = formData.get("action") as LoginAsType;
+
+  let userId;
+
+  switch (action) {
+    case "Admin":
+      userId = "cl3919t2n0008l0sw9m6jny35";
+      break;
+    case "User":
+      userId = "cl391ccvq0055l0sw9rmndobj";
+    default:
+      userId = "cl391ccvq0055l0sw9rmndobj";
+      break;
+  }
+
+  return createUserSession({
+    request,
+    userId,
+    remember: false,
+    redirectTo: action === "Admin" ? "/items" : "/reservations",
+  });
+};
 
 export default function Index() {
   const user = useOptionalUser();
 
   return (
     <main className="relative min-h-screen bg-white sm:flex sm:items-center sm:justify-center">
+      {user ? (
+        <>
+          <Form
+            action="/logout"
+            method="post"
+            className="absolute right-4 top-4
+      "
+          >
+            <button
+              type="submit"
+              className="rounded bg-slate-600 py-2 px-4 text-blue-100 hover:bg-blue-500 active:bg-blue-600"
+            >
+              Logout
+            </button>
+          </Form>
+        </>
+      ) : process.env.NODE_ENV !== "production" ? (
+        <div
+          className="absolute right-4 top-4 flex
+        "
+        >
+          <Form method="post">
+            <input type="hidden" name="action" value="Admin" />
+            <button
+              type="submit"
+              className="rounded bg-slate-600 py-2 px-4 text-blue-100 hover:bg-blue-500 active:bg-blue-600"
+            >
+              Login admin
+            </button>
+          </Form>
+          <Form method="post" className="ml-4">
+            <input type="hidden" name="action" value="User" />
+            <button
+              type="submit"
+              className="rounded bg-slate-600 py-2 px-4 text-blue-100 hover:bg-blue-500 active:bg-blue-600"
+            >
+              Login user
+            </button>
+          </Form>
+        </div>
+      ) : null}
       <div className="relative sm:pb-16 sm:pt-8">
         <div className="mx-auto max-w-7xl sm:px-6 lg:px-8">
           <div className="relative shadow-xl sm:overflow-hidden sm:rounded-2xl">
@@ -40,14 +111,6 @@ export default function Index() {
                           Add new items
                         </Link>
                       </div>
-                      {/* <div className="mx-auto mt-10 max-w-sm sm:flex sm:max-w-none sm:justify-center">
-                      <Link
-                        to="/items"
-                        className="flex items-center justify-center rounded-md border border-transparent bg-white px-4 py-3 text-base font-medium text-yellow-700 shadow-sm hover:bg-yellow-50 sm:px-8"
-                      >
-                        Add new items
-                      </Link>
-                    </div> */}
                     </>
                   ) : (
                     <div className="mx-auto mt-10 max-w-sm sm:flex sm:max-w-none sm:justify-center">
@@ -55,7 +118,7 @@ export default function Index() {
                         to="/reservations"
                         className="flex items-center justify-center rounded-md border border-transparent bg-white px-4 py-3 text-base font-medium text-yellow-700 shadow-sm hover:bg-yellow-50 sm:px-8"
                       >
-                        View Reservations for {user.email}
+                        View your reservations
                       </Link>
                     </div>
                   )

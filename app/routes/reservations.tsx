@@ -5,7 +5,6 @@ import { Form, Link, NavLink, Outlet, useLoaderData } from "@remix-run/react";
 import { requireUserId } from "~/session.server";
 import { useUser } from "~/utils";
 import { getReservationsListItems } from "~/models/reservation.server";
-import invariant from "tiny-invariant";
 
 type LoaderData = {
   reservationListItems: Awaited<ReturnType<typeof getReservationsListItems>>;
