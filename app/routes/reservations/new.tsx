@@ -87,7 +87,6 @@ export const action: ActionFunction = async ({ request }) => {
       { status: 400 }
     );
   }
-
   if (typeof reservedDevices !== "object" || reservedDevices.length === 0) {
     return json<ActionData>(
       { errors: { reservedDevices: "ReservedDevices are required" } },
@@ -107,6 +106,8 @@ export const action: ActionFunction = async ({ request }) => {
     userId,
     itemIds,
   });
+
+  if (!reservation) return null;
 
   return redirect(`/reservations/${reservation.id}`);
 };

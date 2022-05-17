@@ -22,6 +22,7 @@ export const loader: LoaderFunction = async ({ request, params }) => {
 export default function NotesPage() {
   const data = useLoaderData() as LoaderData;
   const user = useUser();
+
   return (
     <div className="flex h-full min-h-screen flex-col">
       <header className="flex items-center justify-between bg-slate-800 p-4 text-white">
@@ -51,18 +52,22 @@ export default function NotesPage() {
             <p className="p-4">No reservations yet</p>
           ) : (
             <ol>
-              {data.reservationListItems.map((reservation) => (
-                <li key={reservation.id}>
-                  <NavLink
-                    className={({ isActive }) =>
-                      `block border-b p-4 text-xl ${isActive ? "bg-white" : ""}`
-                    }
-                    to={reservation.id}
-                  >
-                    📝 {reservation.projectName}
-                  </NavLink>
-                </li>
-              ))}
+              {data.reservationListItems.map((reservation) =>
+                reservation.deleted ? null : (
+                  <li key={reservation.id}>
+                    <NavLink
+                      className={({ isActive }) =>
+                        `block border-b p-4 text-xl ${
+                          isActive ? "bg-white" : ""
+                        }`
+                      }
+                      to={reservation.id}
+                    >
+                      📝 {reservation.projectName}
+                    </NavLink>
+                  </li>
+                )
+              )}
             </ol>
           )}
         </div>

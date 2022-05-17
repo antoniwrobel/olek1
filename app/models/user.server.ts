@@ -13,13 +13,16 @@ export async function getUserByEmail(email: User["email"]) {
   return prisma.user.findUnique({ where: { email } });
 }
 
+export async function checkIfIsAdmin(userId: User["id"]) {
+  const user = await prisma.user.findUnique({ where: { id: userId } });
+  return user?.isAdmin;
+}
+
 export async function createUser(email: User["email"], password: string) {
   const hashedPassword = await bcrypt.hash(password, 10);
 
   const [, domain] = email.split("@");
   const isAdmin = domain.includes("stantart.pl");
-
-  console.log({ email, domain, isAdmin });
   return prisma.user.create({
     data: {
       email,

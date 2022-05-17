@@ -1,6 +1,7 @@
 import type { User, Item, Reservation, ItemParent } from "@prisma/client";
 
 import { prisma } from "~/db.server";
+import { checkIfIsAdmin } from "./user.server";
 
 export type { Item, Reservation } from "@prisma/client";
 
@@ -12,6 +13,32 @@ export async function getReservation({
 }) {
   const reservation = await prisma.reservation.findFirst({
     where: { id, userId },
+  });
+
+  return reservation;
+}
+
+export async function confirmReservation({
+  id,
+  userId,
+}: Pick<Reservation, "id"> & {
+  userId: User["id"];
+}) {
+  if (!checkIfIsAdmin(userId)) return;
+
+  const reservation = await prisma.reservation.update({
+    where: { id },
+    data: {
+      confirmed: true,
+    },
+  });
+
+  return reservation;
+}
+
+export async function getAdminReservation({ id }: Pick<Reservation, "id">) {
+  const reservation = await prisma.reservation.findFirst({
+    where: { id },
   });
 
   return reservation;
@@ -82,6 +109,10 @@ export async function createReservation({
     },
   });
 
+  if (!createdReservation) return;
+
+  console.log({ createdReservation });
+
   await prisma.item.updateMany({
     where: {
       id: {
@@ -112,14 +143,10 @@ export async function createReservation({
   return createdReservation;
 }
 
-export async function deleteReservation({
-  id,
-  userId,
-}: Pick<Reservation, "id"> & { userId: User["id"] }) {
+export async function returnReservation({ id }: Pick<Reservation, "id">) {
   const reservation = await prisma.reservation.findFirst({
     where: {
       id,
-      userId: userId,
     },
   });
 
@@ -149,7 +176,106 @@ export async function deleteReservation({
     },
   });
 
-  return prisma.reservation.deleteMany({
-    where: { id, userId },
+  return prisma.reservation.update({
+    where: { id },
+    data: {
+      deleted: true,
+    },
   });
 }
+
+export async function adminRejectReservation({ id }: Pick<Reservation, "id">) {
+  const reservation = await prisma.reservation.findFirst({
+    where: {
+      id,
+    },
+  });
+
+  if (!reservation) return;
+
+  await prisma.itemParent.updateMany({
+    where: {
+      items: {
+        some: {
+          reservationId: reservation.id,
+        },
+      },
+    },
+    data: {
+      quantity: {
+        increment: 1,
+      },
+    },
+  });
+
+  await prisma.item.updateMany({
+    where: {
+      reservationId: reservation.id,
+    },
+    data: {
+      taken: false,
+    },
+  });
+
+  return prisma.reservation.update({
+    where: { id },
+    data: {
+      deletedByAdmin: true,
+    },
+  });
+}
+
+export async function deleteReservation({
+  id,
+  userId,
+}: Pick<Reservation, "id"> & {
+  userId: User["id"];
+}) {
+  const reservation = await prisma.reservation.findFirst({
+    where: {
+      id,
+      userId,
+    },
+  });
+
+  if (!reservation) return;
+
+  await prisma.itemParent.updateMany({
+    where: {
+      items: {
+        some: {
+          reservationId: reservation.id,
+        },
+      },
+    },
+    data: {
+      quantity: {
+        increment: 1,
+      },
+    },
+  });
+
+  await prisma.item.updateMany({
+    where: {
+      reservationId: reservation.id,
+    },
+    data: {
+      taken: false,
+    },
+  });
+
+  return prisma.reservation.update({
+    where: { id },
+    data: {
+      deleted: true,
+    },
+  });
+}
+
+export const getAllReservations = async () => {
+  const allReservation = await prisma.reservation.findMany({});
+
+  if (!allReservation.length) return;
+
+  return allReservation;
+};

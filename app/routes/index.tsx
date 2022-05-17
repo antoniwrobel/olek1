@@ -102,7 +102,7 @@ export default function Index() {
               <div className="mx-auto mt-10 max-w-sm sm:flex sm:max-w-none sm:justify-center">
                 {user ? (
                   user.isAdmin ? (
-                    <>
+                    <div className="flex flex-col">
                       <div className="mx-auto mt-10 max-w-sm sm:flex sm:max-w-none sm:justify-center">
                         <Link
                           to="/items"
@@ -111,7 +111,15 @@ export default function Index() {
                           Add new items
                         </Link>
                       </div>
-                    </>
+                      <div className="mx-auto mt-10 max-w-sm sm:flex sm:max-w-none sm:justify-center">
+                        <Link
+                          to="/list-of-reservations"
+                          className="flex items-center justify-center rounded-md border border-transparent bg-white px-4 py-3 text-base font-medium text-yellow-700 shadow-sm hover:bg-yellow-50 sm:px-8"
+                        >
+                          List of reservations
+                        </Link>
+                      </div>
+                    </div>
                   ) : (
                     <div className="mx-auto mt-10 max-w-sm sm:flex sm:max-w-none sm:justify-center">
                       <Link

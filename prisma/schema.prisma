@@ -33,12 +33,15 @@ model Reservation {
   id                  String            @id @default(uuid())
   createdAt           DateTime          @default(now())
   updatedAt           DateTime          @updatedAt
+  deleted             Boolean           @default(false)
+  deletedByAdmin      Boolean           @default(false)
   startDate           DateTime
   endDate             DateTime
   projectName         String
   projectId           String
   userId              String
-  user                User             @relation(fields: [userId], references: [id])
+  confirmed           Boolean           @default(false)
+  user                User              @relation(fields: [userId], references: [id])
   items               Item[]
 }
 
