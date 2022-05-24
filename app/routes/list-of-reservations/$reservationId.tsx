@@ -90,7 +90,7 @@ export default function NoteDetailsPage() {
         </Form>
       ) : data.reservation.deletedByAdmin ||
         (data.reservation.deleted && data.reservation.confirmed) ? null : (
-        <>
+        <div className="flex">
           <Form method="post">
             <button
               type="submit"
@@ -100,7 +100,7 @@ export default function NoteDetailsPage() {
               Confirm
             </button>
           </Form>
-          <Form method="post">
+          <Form method="post" className="ml-3">
             <button
               type="submit"
               className="rounded bg-blue-500  py-2 px-4 text-white hover:bg-blue-600 focus:bg-blue-400"
@@ -109,7 +109,7 @@ export default function NoteDetailsPage() {
               Reject
             </button>
           </Form>
-        </>
+        </div>
       )}
     </div>
   );

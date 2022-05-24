@@ -73,8 +73,7 @@ export default function NoteDetailsPage() {
         <h2 className="pb-12 text-2xl font-bold">Items borrowed:</h2>
         {data.itemsParentDetails.map((itemParentDetails) => (
           <p key={itemParentDetails.id}>
-            {itemParentDetails.name} - {itemParentDetails.desc} -{" "}
-            <small>{itemParentDetails.id}</small>
+            {itemParentDetails.name} - {itemParentDetails.desc}
           </p>
         ))}
         {!data.reservation.deletedByAdmin && !data.reservation.confirmed && (
