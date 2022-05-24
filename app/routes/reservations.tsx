@@ -23,6 +23,34 @@ export default function NotesPage() {
   const data = useLoaderData() as LoaderData;
   const user = useUser();
 
+  console.log(data.reservationListItems);
+
+  const reservationToConfirm = data.reservationListItems?.filter(
+    (reservation) =>
+      !reservation.deletedByAdmin &&
+      reservation.confirmed === false &&
+      !reservation.deleted
+  );
+  const reservationConfirmed = data.reservationListItems?.filter(
+    (reservation) => reservation.confirmed === true && !reservation.deleted
+  );
+
+  const reservationRejected = data.reservationListItems?.filter(
+    (reservation) => reservation.deletedByAdmin === true
+  );
+
+  const reservationReturned = data.reservationListItems?.filter(
+    (reservation) =>
+      reservation.deleted === true && reservation.confirmed === true
+  );
+
+  console.log({
+    reservationToConfirm,
+    reservationConfirmed,
+    reservationRejected,
+    reservationReturned,
+  });
+
   return (
     <div className="flex h-full min-h-screen flex-col">
       <header className="flex items-center justify-between bg-slate-800 p-4 text-white">
@@ -51,24 +79,104 @@ export default function NotesPage() {
           {data.reservationListItems.length === 0 ? (
             <p className="p-4">No reservations yet</p>
           ) : (
-            <ol>
-              {data.reservationListItems.map((reservation) =>
-                reservation.deleted ? null : (
-                  <li key={reservation.id}>
-                    <NavLink
-                      className={({ isActive }) =>
-                        `block border-b p-4 text-xl ${
-                          isActive ? "bg-white" : ""
-                        }`
-                      }
-                      to={reservation.id}
-                    >
-                      📝 {reservation.projectName}
-                    </NavLink>
-                  </li>
-                )
-              )}
-            </ol>
+            <>
+              <>
+                {reservationToConfirm?.length ? (
+                  <>
+                    <ol>
+                      Czekające na potwierdzenie:
+                      {reservationToConfirm.map((reservation) => (
+                        <li key={reservation.id}>
+                          <NavLink
+                            className={({ isActive }) =>
+                              `block border-b p-4 text-xl ${
+                                isActive ? "bg-white" : ""
+                              }`
+                            }
+                            to={reservation.id}
+                          >
+                            📝 {reservation.projectName} -{" "}
+                            {reservation.projectId}
+                          </NavLink>
+                        </li>
+                      ))}
+                    </ol>
+                    <hr />
+                  </>
+                ) : null}
+
+                {reservationConfirmed?.length ? (
+                  <>
+                    <ol>
+                      Potwierdzone:
+                      {reservationConfirmed.map((reservation) => (
+                        <li key={reservation.id}>
+                          <NavLink
+                            className={({ isActive }) =>
+                              `block border-b p-4 text-xl ${
+                                isActive ? "bg-white" : ""
+                              }`
+                            }
+                            to={reservation.id}
+                          >
+                            📝 {reservation.projectName} -{" "}
+                            {reservation.projectId}
+                          </NavLink>
+                        </li>
+                      ))}
+                    </ol>
+                    <hr />
+                  </>
+                ) : null}
+
+                {reservationRejected?.length ? (
+                  <>
+                    <ol>
+                      Odrzucone:
+                      {reservationRejected.map((reservation) => (
+                        <li key={reservation.id}>
+                          <NavLink
+                            className={({ isActive }) =>
+                              `block border-b p-4 text-xl ${
+                                isActive ? "bg-white" : ""
+                              }`
+                            }
+                            to={reservation.id}
+                          >
+                            📝 {reservation.projectName} -{" "}
+                            {reservation.projectId}
+                          </NavLink>
+                        </li>
+                      ))}
+                    </ol>
+                    <hr />
+                  </>
+                ) : null}
+
+                {reservationReturned?.length ? (
+                  <>
+                    <ol>
+                      Zwrocone:
+                      {reservationReturned.map((reservation) => (
+                        <li key={reservation.id}>
+                          <NavLink
+                            className={({ isActive }) =>
+                              `block border-b p-4 text-xl ${
+                                isActive ? "bg-white" : ""
+                              }`
+                            }
+                            to={reservation.id}
+                          >
+                            📝 {reservation.projectName} -{" "}
+                            {reservation.projectId}
+                          </NavLink>
+                        </li>
+                      ))}
+                    </ol>
+                  </>
+                ) : null}
+              </>
+            </>
           )}
         </div>
 

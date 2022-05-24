@@ -62,77 +62,96 @@ export default function NotesPage() {
             <p className="p-4">No items yet</p>
           ) : (
             <>
-              <ol>
-                do potwierdzenia:
-                {reservationToConfirm?.map((reservation) => (
-                  <li key={reservation.id}>
-                    <NavLink
-                      className={({ isActive }) =>
-                        `block border-b p-4 text-xl ${
-                          isActive ? "bg-white" : ""
-                        }`
-                      }
-                      to={reservation.id}
-                    >
-                      📝 {reservation.projectName} - {reservation.projectId}
-                    </NavLink>
-                  </li>
-                ))}
-              </ol>
-              <hr />
-              <ol>
-                potwierdzone:
-                {reservationConfirmed?.map((reservation) => (
-                  <li key={reservation.id}>
-                    <NavLink
-                      className={({ isActive }) =>
-                        `block border-b p-4 text-xl ${
-                          isActive ? "bg-white" : ""
-                        }`
-                      }
-                      to={reservation.id}
-                    >
-                      📝 {reservation.projectName} - {reservation.projectId}
-                    </NavLink>
-                  </li>
-                ))}
-              </ol>
-              <hr />
-              <ol>
-                odrzucone:
-                {reservationRejected?.map((reservation) => (
-                  <li key={reservation.id}>
-                    <NavLink
-                      className={({ isActive }) =>
-                        `block border-b p-4 text-xl ${
-                          isActive ? "bg-white" : ""
-                        }`
-                      }
-                      to={reservation.id}
-                    >
-                      📝 {reservation.projectName} - {reservation.projectId}
-                    </NavLink>
-                  </li>
-                ))}
-              </ol>
-              <hr />
-              <ol>
-                zwrocone:
-                {reservationReturned?.map((reservation) => (
-                  <li key={reservation.id}>
-                    <NavLink
-                      className={({ isActive }) =>
-                        `block border-b p-4 text-xl ${
-                          isActive ? "bg-white" : ""
-                        }`
-                      }
-                      to={reservation.id}
-                    >
-                      📝 {reservation.projectName} - {reservation.projectId}
-                    </NavLink>
-                  </li>
-                ))}
-              </ol>
+              {reservationToConfirm?.length ? (
+                <>
+                  <ol>
+                    Czekające na potwierdzenie:
+                    {reservationToConfirm.map((reservation) => (
+                      <li key={reservation.id}>
+                        <NavLink
+                          className={({ isActive }) =>
+                            `block border-b p-4 text-xl ${
+                              isActive ? "bg-white" : ""
+                            }`
+                          }
+                          to={reservation.id}
+                        >
+                          📝 {reservation.projectName} - {reservation.projectId}
+                        </NavLink>
+                      </li>
+                    ))}
+                  </ol>
+                  <hr />
+                </>
+              ) : null}
+
+              {reservationConfirmed?.length ? (
+                <>
+                  <ol>
+                    Potwierdzone:
+                    {reservationConfirmed.map((reservation) => (
+                      <li key={reservation.id}>
+                        <NavLink
+                          className={({ isActive }) =>
+                            `block border-b p-4 text-xl ${
+                              isActive ? "bg-white" : ""
+                            }`
+                          }
+                          to={reservation.id}
+                        >
+                          📝 {reservation.projectName} - {reservation.projectId}
+                        </NavLink>
+                      </li>
+                    ))}
+                  </ol>
+                  <hr />
+                </>
+              ) : null}
+
+              {reservationRejected?.length ? (
+                <>
+                  <ol>
+                    Odrzucone:
+                    {reservationRejected.map((reservation) => (
+                      <li key={reservation.id}>
+                        <NavLink
+                          className={({ isActive }) =>
+                            `block border-b p-4 text-xl ${
+                              isActive ? "bg-white" : ""
+                            }`
+                          }
+                          to={reservation.id}
+                        >
+                          📝 {reservation.projectName} - {reservation.projectId}
+                        </NavLink>
+                      </li>
+                    ))}
+                  </ol>
+                  <hr />
+                </>
+              ) : null}
+
+              {reservationReturned?.length ? (
+                <>
+                  <ol>
+                    Zwrocone:
+                    {reservationReturned.map((reservation) => (
+                      <li key={reservation.id}>
+                        <NavLink
+                          className={({ isActive }) =>
+                            `block border-b p-4 text-xl ${
+                              isActive ? "bg-white" : ""
+                            }`
+                          }
+                          to={reservation.id}
+                        >
+                          📝 {reservation.projectName} - {reservation.projectId}
+                        </NavLink>
+                      </li>
+                    ))}
+                  </ol>
+                </>
+              ) : null}
             </>
           )}
         </div>
