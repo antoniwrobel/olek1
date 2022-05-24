@@ -48,20 +48,24 @@ export const action: ActionFunction = async ({ request, params }) => {
 
 export default function NoteDetailsPage() {
   const data = useLoaderData() as LoaderData;
-
+  const isReservationReturned =
+    data.reservation.confirmed && data.reservation.deleted;
   return (
     <div>
       <>
-        <div className="flex text-base font-medium">
-          <h3 className="text-2xl font-bold">Is ready: </h3>
-          <h3 className="ml-2 text-2xl">
-            {data.reservation.deletedByAdmin
-              ? "This reservation has been rejected by admin"
-              : data.reservation.confirmed
-              ? "YES"
-              : "NO"}
-          </h3>
-        </div>
+        {!isReservationReturned ? (
+          <div className="flex text-base font-medium">
+            <h3 className="text-2xl font-bold">Is ready: </h3>
+            <h3 className="ml-2 text-2xl">
+              {data.reservation.deletedByAdmin
+                ? "This reservation has been rejected by admin"
+                : data.reservation.confirmed
+                ? "YES"
+                : "NO"}
+            </h3>
+          </div>
+        ) : null}
+
         <h3 className="text-2xl font-bold">
           Project Name: {data.reservation.projectName}
         </h3>
