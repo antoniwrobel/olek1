@@ -1,10 +1,11 @@
-import type { LoaderFunction } from "@remix-run/node";
+import { LoaderFunction, redirect } from "@remix-run/node";
 import { json } from "@remix-run/node";
 import { Form, Link, NavLink, Outlet, useLoaderData } from "@remix-run/react";
 
 import { requireUserId } from "~/session.server";
 import { useUser } from "~/utils";
 import { getReservationsListItems } from "~/models/reservation.server";
+import { checkIfIsAdmin } from "~/models/user.server";
 
 type LoaderData = {
   reservationListItems: Awaited<ReturnType<typeof getReservationsListItems>>;
@@ -12,6 +13,12 @@ type LoaderData = {
 
 export const loader: LoaderFunction = async ({ request, params }) => {
   const userId = await requireUserId(request);
+
+  const isAdmin = await checkIfIsAdmin(userId);
+
+  if (isAdmin) {
+    throw new Response("Not Authorized", { status: 401 });
+  }
 
   const reservationListItems = await getReservationsListItems({
     userId,
@@ -22,8 +29,6 @@ export const loader: LoaderFunction = async ({ request, params }) => {
 export default function NotesPage() {
   const data = useLoaderData() as LoaderData;
   const user = useUser();
-
-  console.log(data.reservationListItems);
 
   const reservationToConfirm = data.reservationListItems?.filter(
     (reservation) =>
