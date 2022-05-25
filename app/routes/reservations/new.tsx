@@ -133,7 +133,8 @@ export default function NewReservationPage() {
 
   const { availableItemParents } = useLoaderData<AvailableItemParentsType>();
 
-  if (!availableItemParents?.length) return <div>loading...</div>;
+  if (!availableItemParents?.length)
+    return <div>brak sprzetu w magazynie...</div>;
 
   return (
     <Form

@@ -49,13 +49,6 @@ export default function NotesPage() {
       reservation.deleted === true && reservation.confirmed === true
   );
 
-  console.log({
-    reservationToConfirm,
-    reservationConfirmed,
-    reservationRejected,
-    reservationReturned,
-  });
-
   return (
     <div className="flex h-full min-h-screen flex-col">
       <header className="flex items-center justify-between bg-slate-800 p-4 text-white">

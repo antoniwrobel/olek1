@@ -14,6 +14,7 @@ import { requireUserId } from "~/session.server";
 type LoaderData = {
   reservation: Reservation;
   itemsParentDetails: { desc: string; name: string; id: string }[];
+  itemsBorrowedDetails: ({ id: string; name: string; desc: string } | null)[];
 };
 
 export const loader: LoaderFunction = async ({ request, params }) => {
@@ -30,11 +31,15 @@ export const loader: LoaderFunction = async ({ request, params }) => {
     throw new Response("Not Found", { status: 404 });
   }
 
-  const itemsParentDetails = await getItemDetails({
+  const { itemsBorrowedDetails, itemParents } = await getItemDetails({
     id: reservation.id,
   });
 
-  return json<LoaderData>({ reservation, itemsParentDetails });
+  return json<LoaderData>({
+    reservation,
+    itemsParentDetails: itemParents,
+    itemsBorrowedDetails,
+  });
 };
 
 export const action: ActionFunction = async ({ request, params }) => {
@@ -50,6 +55,13 @@ export default function NoteDetailsPage() {
   const data = useLoaderData() as LoaderData;
   const isReservationReturned =
     data.reservation.confirmed && data.reservation.deleted;
+
+  const formattedData = data.itemsBorrowedDetails.length
+    ? data.itemsBorrowedDetails
+    : data.itemsParentDetails.length
+    ? data.itemsParentDetails
+    : [];
+
   return (
     <div>
       <>
@@ -71,11 +83,17 @@ export default function NoteDetailsPage() {
         </h3>
         <p className="py-2 pb-12">Project ID: {data.reservation.projectId}</p>
         <h2 className="pb-12 text-2xl font-bold">Items borrowed:</h2>
-        {data.itemsParentDetails.map((itemParentDetails) => (
-          <p key={itemParentDetails.id}>
-            {itemParentDetails.name} - {itemParentDetails.desc}
-          </p>
-        ))}
+
+        {formattedData.map((itemParentDetails) => {
+          if (!itemParentDetails) return;
+
+          return (
+            <p key={itemParentDetails.id}>
+              {itemParentDetails.name} - {itemParentDetails.desc}
+            </p>
+          );
+        })}
+
         {!data.reservation.deletedByAdmin && !data.reservation.confirmed && (
           <>
             <hr className="my-4" />

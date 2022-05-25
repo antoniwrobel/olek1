@@ -30,30 +30,39 @@ model User {
 }
 
 model Reservation {
-  id                  String            @id @default(uuid())
-  createdAt           DateTime          @default(now())
-  updatedAt           DateTime          @updatedAt
-  deleted             Boolean           @default(false)
-  deletedByAdmin      Boolean           @default(false)
-  startDate           DateTime
-  endDate             DateTime
-  projectName         String
-  projectId           String
-  userId              String
-  confirmed           Boolean           @default(false)
-  user                User              @relation(fields: [userId], references: [id])
-  items               Item[]
+  id                      String            @id @default(uuid())
+  createdAt               DateTime          @default(now())
+  updatedAt               DateTime          @updatedAt
+  deleted                 Boolean           @default(false)
+  deletedByAdmin          Boolean           @default(false)
+  startDate               DateTime
+  endDate                 DateTime
+  projectName             String
+  projectId               String
+  userId                  String
+  confirmed               Boolean           @default(false)
+  user                    User              @relation(fields: [userId], references: [id])
+  finishedReservation     FinishedReservation[]
 }
+
+model FinishedReservation {
+  id                  String            @id @default(uuid())
+  reservationId       String
+  reservation         Reservation       @relation(fields: [reservationId], references: [id])
+  itemId              String
+  item                Item              @relation(fields: [itemId], references: [id])
+}
+
 
 model Item {
   id                  String            @id @default(uuid())
   createdAt           DateTime          @default(now())
   updatedAt           DateTime          @updatedAt
   parent              ItemParent?       @relation(fields: [parentId], references: [id])
-  parentId            String?
+  parentId            String
   taken               Boolean           @default(false)
-  reservation         Reservation?      @relation(fields: [reservationId], references: [id])
   reservationId       String?
+  finishedReservation FinishedReservation[]
 }
 
 model ItemParent {

@@ -1,4 +1,9 @@
-import type { User, Item, Reservation, ItemParent } from "@prisma/client";
+import type {
+  User,
+  Item,
+  Reservation,
+  FinishedReservation,
+} from "@prisma/client";
 
 import { prisma } from "~/db.server";
 import { checkIfIsAdmin } from "./user.server";
@@ -45,19 +50,19 @@ export async function getAdminReservation({ id }: Pick<Reservation, "id">) {
 }
 
 export async function getItemDetails({ id }: { id: Reservation["id"] }) {
-  const itemParentIds = await prisma.item.findMany({
+  const items = await prisma.item.findMany({
     where: {
       reservationId: id,
     },
     select: {
       parentId: true,
+      id: true,
     },
   });
 
   const itemParentIdsArray: string[] = [];
 
-  itemParentIds.map(({ parentId }) => {
-    if (!parentId) return;
+  items.map(({ parentId }) => {
     return itemParentIdsArray.push(parentId);
   });
 
@@ -74,7 +79,31 @@ export async function getItemDetails({ id }: { id: Reservation["id"] }) {
     },
   });
 
-  return itemParents;
+  const itemsBorrowed = await prisma.finishedReservation.findMany({
+    where: {
+      reservationId: id,
+    },
+    select: {
+      item: true,
+    },
+  });
+
+  const detailsPromise = itemsBorrowed.map(({ item }) => {
+    return prisma.itemParent.findFirst({
+      where: {
+        id: item.parentId,
+      },
+      select: {
+        id: true,
+        name: true,
+        desc: true,
+      },
+    });
+  });
+
+  const itemsBorrowedDetails = await Promise.all(detailsPromise);
+
+  return { itemParents, items, itemsBorrowedDetails };
 }
 
 export function getReservationsListItems({ userId }: { userId: User["id"] }) {
@@ -110,8 +139,6 @@ export async function createReservation({
   });
 
   if (!createdReservation) return;
-
-  console.log({ createdReservation });
 
   await prisma.item.updateMany({
     where: {
@@ -167,14 +194,32 @@ export async function returnReservation({ id }: Pick<Reservation, "id">) {
     },
   });
 
+  const allBorrowedItems = await prisma.item.findMany({
+    where: {
+      reservationId: reservation.id,
+    },
+  });
+
+  const createFinishedReservationPromise = allBorrowedItems.map((item) => {
+    return prisma.finishedReservation.create({
+      data: {
+        reservationId: reservation.id,
+        itemId: item.id,
+      },
+    });
+  });
+
   await prisma.item.updateMany({
     where: {
       reservationId: reservation.id,
     },
     data: {
       taken: false,
+      reservationId: null,
     },
   });
+
+  await Promise.all(createFinishedReservationPromise);
 
   return prisma.reservation.update({
     where: { id },
@@ -208,14 +253,35 @@ export async function adminRejectReservation({ id }: Pick<Reservation, "id">) {
     },
   });
 
+  const borrowedItems = await prisma.item.findMany({
+    where: {
+      reservationId: reservation.id,
+    },
+    select: {
+      id: true,
+    },
+  });
+
   await prisma.item.updateMany({
     where: {
       reservationId: reservation.id,
     },
     data: {
       taken: false,
+      reservationId: null,
     },
   });
+
+  const updateFinishedPromise = borrowedItems.map((item) => {
+    return prisma.finishedReservation.create({
+      data: {
+        reservationId: reservation.id,
+        itemId: item.id,
+      },
+    });
+  });
+
+  await Promise.all(updateFinishedPromise);
 
   return prisma.reservation.update({
     where: { id },
@@ -261,6 +327,7 @@ export async function deleteReservation({
     },
     data: {
       taken: false,
+      reservationId: null,
     },
   });
 

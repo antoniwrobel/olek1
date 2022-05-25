@@ -87,7 +87,7 @@ export async function createItemParent({
   return createdParentItem;
 }
 
-export function createItem({ parentId }: Pick<Item, "parentId">) {
+function createItem({ parentId }: Pick<Item, "parentId">) {
   return prisma.item.create({
     data: {
       parentId: parentId,
