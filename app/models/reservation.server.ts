@@ -85,11 +85,12 @@ export async function getItemDetails({ id }: { id: Reservation["id"] }) {
     },
     select: {
       item: true,
+      itemId: true,
     },
   });
 
-  const detailsPromise = itemsBorrowed.map(({ item }) => {
-    return prisma.itemParent.findFirst({
+  const detailsPromise = itemsBorrowed.map(async ({ item }) => {
+    const dbObj = await prisma.itemParent.findFirst({
       where: {
         id: item.parentId,
       },
@@ -99,6 +100,9 @@ export async function getItemDetails({ id }: { id: Reservation["id"] }) {
         desc: true,
       },
     });
+    //@ts-ignore
+    dbObj.itemId = item.id;
+    return dbObj;
   });
 
   const itemsBorrowedDetails = await Promise.all(detailsPromise);

@@ -109,8 +109,8 @@ export default function NoteDetailsPage() {
 
         return (
           <p key={id}>
-            {name} - {desc} -{" "}
-            <small>{itemDetails?.id || itemParentDetails.id}</small>
+            {name} - {desc} -{/* @ts-ignore */}
+            <small>{itemDetails?.id || itemParentDetails.itemId}</small>
           </p>
         );
       })}
