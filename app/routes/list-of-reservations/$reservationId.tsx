@@ -15,6 +15,7 @@ import {
 } from "~/models/reservation.server";
 import { getUserById } from "~/models/user.server";
 import { requireUserId } from "~/session.server";
+import { CLIENT_RENEG_WINDOW } from "tls";
 
 type LoaderData = {
   reservation: Reservation;
@@ -106,11 +107,21 @@ export default function NoteDetailsPage() {
         );
 
         const itemDetails = data.itemsDetails[itemId];
+        const itemQty = {};
 
+        data.itemsParentDetails.map((itemParent) => {
+          const { id } = itemParent;
+          //@ts-ignore
+          itemQty[id] = data.itemsDetails.filter(
+            (e) => e.parentId === id
+          ).length;
+        });
         return (
           <p key={id}>
-            {name} - {desc} -{/* @ts-ignore */}
-            <small>{itemDetails?.id || itemParentDetails.itemId}</small>
+            {name} - {desc} - {/* @ts-ignore */}
+            <small>{itemParentDetails.itemId}</small>
+            {/* @ts-ignore */}
+            <small>{itemQty[itemDetails.parentId]}</small>
           </p>
         );
       })}

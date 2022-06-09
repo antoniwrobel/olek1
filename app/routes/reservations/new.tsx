@@ -51,7 +51,7 @@ export const action: ActionFunction = async ({ request }) => {
   const endDate = formData.get("endDate");
   const projectName = formData.get("projectName");
   const projectId = formData.get("projectId");
-  const reservedDevices = formData.getAll("reservedDevices");
+  const reservedDevices = formData.getAll("reservedDevices") as string[];
 
   if (typeof projectName !== "string" || projectName.length === 0) {
     return json<ActionData>(
@@ -94,9 +94,26 @@ export const action: ActionFunction = async ({ request }) => {
     );
   }
 
+  const parentItems = {};
+  const filteredReservedDevices = reservedDevices.filter((reservedDevice) =>
+    Boolean(reservedDevice)
+  );
+
+  filteredReservedDevices.map((device) => {
+    const [ids, name] = device.split("===");
+    const idsArray = ids.split("_");
+    //@ts-ignore
+    parentItems[name] = idsArray;
+  });
+
+  // const ids = filteredReservedDevices.map((e) => e.split("_"));
+
+  // const flatIdsArray = ids.reduce((acc, curVal) => {
+  //   return acc.concat(curVal);
+  // }, []);
+
   const formattedStartDate = new Date(startDate);
   const formattedEndDate = new Date(endDate);
-  const itemIds = [...reservedDevices] as string[];
 
   const reservation = await createReservation({
     startDate: formattedStartDate,
@@ -104,12 +121,14 @@ export const action: ActionFunction = async ({ request }) => {
     projectName,
     projectId,
     userId,
-    itemIds,
+    itemIds: parentItems,
   });
 
   if (!reservation) return null;
 
   return redirect(`/reservations/${reservation.id}`);
+
+  return null;
 };
 
 export default function NewReservationPage() {
@@ -148,22 +167,35 @@ export default function NewReservationPage() {
     >
       <div>
         <div>
-          {availableItemParents.map((item) => {
-            const { id, name, items } = item;
-            const [{ id: singleID }] = items.filter((e) => !e.taken);
+          {availableItemParents.map((parentItem) => {
+            const { id, name, items, quantity } = parentItem;
+            const allAvailableItems = items.filter((e) => !e.taken);
 
-            if (!item.quantity) return;
+            if (!quantity) return;
 
             return (
               <div key={id}>
-                <input
-                  id={singleID}
-                  value={singleID}
-                  type="checkbox"
-                  name="reservedDevices"
-                />
-                <label htmlFor={singleID}>
-                  {name} - zostało {item.quantity}
+                <select name="reservedDevices" id="reservedDevices">
+                  <option value={""}>0</option>
+                  {allAvailableItems.map((item, idx) => {
+                    const itemsIds =
+                      allAvailableItems
+                        .slice(0, idx + 1)
+                        .map((item) => item.id)
+                        .join("_") +
+                      "===" +
+                      id;
+
+                    return (
+                      <option key={item.id} value={itemsIds}>
+                        {idx + 1}
+                      </option>
+                    );
+                  })}
+                </select>
+
+                <label htmlFor="reservedDevices">
+                  {name} - zostało {quantity}
                 </label>
               </div>
             );

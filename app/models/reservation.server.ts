@@ -63,13 +63,15 @@ export async function getItemDetails({ id }: { id: Reservation["id"] }) {
   const itemParentIdsArray: string[] = [];
 
   items.map(({ parentId }) => {
-    return itemParentIdsArray.push(parentId);
+    itemParentIdsArray.push(parentId);
   });
+
+  const ids = [...new Set(itemParentIdsArray)];
 
   const itemParents = await prisma.itemParent.findMany({
     where: {
       id: {
-        in: itemParentIdsArray,
+        in: ids,
       },
     },
     select: {
@@ -126,7 +128,7 @@ export async function createReservation({
   itemIds,
 }: Pick<Reservation, "startDate" | "endDate" | "projectName" | "projectId"> & {
   userId: User["id"];
-  itemIds: Item["id"][];
+  itemIds: { [key: string]: Item["id"][] };
 }) {
   const createdReservation = await prisma.reservation.create({
     data: {
@@ -144,10 +146,14 @@ export async function createReservation({
 
   if (!createdReservation) return;
 
+  const itemsToUpdate: string[] = [];
+
+  Object.keys(itemIds).map((key) => itemsToUpdate.push(...itemIds[key]));
+
   await prisma.item.updateMany({
     where: {
       id: {
-        in: itemIds,
+        in: itemsToUpdate,
       },
     },
     data: {
@@ -156,19 +162,17 @@ export async function createReservation({
     },
   });
 
-  await prisma.itemParent.updateMany({
-    where: {
-      items: {
-        some: {
-          reservationId: createdReservation.id,
+  Object.keys(itemIds).map(async (parentId) => {
+    return await prisma.itemParent.update({
+      where: {
+        id: parentId,
+      },
+      data: {
+        quantity: {
+          decrement: itemIds[parentId].length,
         },
       },
-    },
-    data: {
-      quantity: {
-        decrement: 1,
-      },
-    },
+    });
   });
 
   return createdReservation;

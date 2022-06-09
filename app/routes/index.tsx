@@ -15,12 +15,12 @@ export const action: ActionFunction = async ({ request }) => {
 
   switch (action) {
     case "Admin":
-      userId = "cl3919t2n0008l0sw9m6jny35";
+      userId = "cl477mm4i0017ksswfxndv2u9";
       break;
     case "User":
-      userId = "cl391ccvq0055l0sw9rmndobj";
+      userId = "cl477nfhl0032ksswoqn8hj5a";
     default:
-      userId = "cl391ccvq0055l0sw9rmndobj";
+      userId = "cl477nfhl0032ksswoqn8hj5a";
       break;
   }
 
