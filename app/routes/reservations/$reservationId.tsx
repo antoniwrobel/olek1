@@ -3,6 +3,39 @@ import { json, redirect } from "@remix-run/node";
 import { Form, useCatch, useLoaderData } from "@remix-run/react";
 import invariant from "tiny-invariant";
 
+//@ts-ignore
+const findOcc = (arr, key) => {
+  //@ts-ignore
+  let arr2 = [];
+
+  //@ts-ignore
+  arr.forEach((x) => {
+    if (
+      //@ts-ignore
+      arr2.some((val) => {
+        return val[key] == x[key];
+      })
+    ) {
+      //@ts-ignore
+      arr2.forEach((k) => {
+        if (k[key] === x[key]) {
+          k["qty"]++;
+        }
+      });
+    } else {
+      let a = {};
+      //@ts-ignore
+      a[key] = x[key];
+      //@ts-ignore
+      a["qty"] = 1;
+      arr2.push(a);
+    }
+  });
+
+  //@ts-ignore
+  return arr2;
+};
+
 import {
   getReservation,
   Reservation,
@@ -13,13 +46,12 @@ import { requireUserId } from "~/session.server";
 
 type LoaderData = {
   reservation: Reservation;
-  itemsParentDetails: { desc: string; name: string; id: string }[];
   itemsBorrowedDetails: ({ id: string; name: string; desc: string } | null)[];
+  itemsReservedDetails: ({ id: string; name: string; desc: string } | null)[];
 };
 
 export const loader: LoaderFunction = async ({ request, params }) => {
   const userId = await requireUserId(request);
-
   invariant(params.reservationId, "reservationId not found");
 
   const reservation = await getReservation({
@@ -28,17 +60,17 @@ export const loader: LoaderFunction = async ({ request, params }) => {
   });
 
   if (!reservation) {
-    throw new Response("Not Found", { status: 404 });
+    throw new Response("Reservation Not Found", { status: 404 });
   }
 
-  const { itemsBorrowedDetails, itemParents } = await getItemDetails({
+  const { itemsReservedDetails, itemsBorrowedDetails } = await getItemDetails({
     id: reservation.id,
   });
 
   return json<LoaderData>({
     reservation,
-    itemsParentDetails: itemParents,
-    itemsBorrowedDetails,
+    itemsReservedDetails: itemsReservedDetails,
+    itemsBorrowedDetails: itemsBorrowedDetails,
   });
 };
 
@@ -58,10 +90,11 @@ export default function NoteDetailsPage() {
 
   const formattedData = data.itemsBorrowedDetails.length
     ? data.itemsBorrowedDetails
-    : data.itemsParentDetails.length
-    ? data.itemsParentDetails
+    : data.itemsReservedDetails.length
+    ? data.itemsReservedDetails
     : [];
 
+  const countedParents = findOcc(formattedData, "name");
   return (
     <div>
       <>
@@ -84,12 +117,11 @@ export default function NoteDetailsPage() {
         <p className="py-2 pb-12">Project ID: {data.reservation.projectId}</p>
         <h2 className="pb-12 text-2xl font-bold">Items borrowed:</h2>
 
-        {formattedData.map((itemParentDetails) => {
-          if (!itemParentDetails) return;
-
+        {countedParents.map(({ name, qty }) => {
           return (
-            <p key={itemParentDetails.id}>
-              {itemParentDetails.name} - {itemParentDetails.desc}
+            <p key={name}>
+              {name} - {/* @ts-ignore */}
+              <small>{qty}</small>
             </p>
           );
         })}

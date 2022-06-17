@@ -15,14 +15,12 @@ import {
 } from "~/models/reservation.server";
 import { getUserById } from "~/models/user.server";
 import { requireUserId } from "~/session.server";
-import { CLIENT_RENEG_WINDOW } from "tls";
 
 type LoaderData = {
   reservation: Reservation;
-  itemsParentDetails: { desc: string; name: string; id: string }[];
   userEmail: User["email"];
-  itemsDetails: { id: string; parentId: string }[];
   itemsBorrowedDetails: ({ id: string; name: string; desc: string } | null)[];
+  itemsReservedDetails: ({ id: string; name: string; desc: string } | null)[];
 };
 
 export const loader: LoaderFunction = async ({ request, params }) => {
@@ -36,7 +34,7 @@ export const loader: LoaderFunction = async ({ request, params }) => {
     throw new Response("Reservation Not Found", { status: 404 });
   }
 
-  const itemDetails = await getItemDetails({
+  const { itemsReservedDetails, itemsBorrowedDetails } = await getItemDetails({
     id: reservation.id,
   });
 
@@ -48,9 +46,8 @@ export const loader: LoaderFunction = async ({ request, params }) => {
 
   return json<LoaderData>({
     reservation,
-    itemsParentDetails: itemDetails.itemParents,
-    itemsDetails: itemDetails.items,
-    itemsBorrowedDetails: itemDetails.itemsBorrowedDetails,
+    itemsReservedDetails: itemsReservedDetails,
+    itemsBorrowedDetails: itemsBorrowedDetails,
     userEmail: user.email,
   });
 };
@@ -84,8 +81,8 @@ export default function NoteDetailsPage() {
 
   const formattedData = data.itemsBorrowedDetails.length
     ? data.itemsBorrowedDetails
-    : data.itemsParentDetails.length
-    ? data.itemsParentDetails
+    : data.itemsReservedDetails.length
+    ? data.itemsReservedDetails
     : [];
 
   return (
@@ -97,31 +94,15 @@ export default function NoteDetailsPage() {
       <p className="py-2 pb-12">Project ID: {data.reservation.projectId}</p>
       <h2 className="pb-12 text-2xl font-bold">Items borrowed:</h2>
 
-      {formattedData.map((itemParentDetails) => {
+      {formattedData.map((itemParentDetails, idx) => {
         if (!itemParentDetails) return;
 
-        const { id, name, desc } = itemParentDetails;
+        const { name, desc } = itemParentDetails;
 
-        const itemId = data.itemsDetails.findIndex(
-          (itemDetail) => itemDetail.parentId === id
-        );
-
-        const itemDetails = data.itemsDetails[itemId];
-        const itemQty = {};
-
-        data.itemsParentDetails.map((itemParent) => {
-          const { id } = itemParent;
-          //@ts-ignore
-          itemQty[id] = data.itemsDetails.filter(
-            (e) => e.parentId === id
-          ).length;
-        });
         return (
-          <p key={id}>
+          <p key={idx}>
             {name} - {desc} - {/* @ts-ignore */}
             <small>{itemParentDetails.itemId}</small>
-            {/* @ts-ignore */}
-            <small>{itemQty[itemDetails.parentId]}</small>
           </p>
         );
       })}
