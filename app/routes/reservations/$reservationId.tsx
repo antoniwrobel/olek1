@@ -2,6 +2,13 @@ import type { ActionFunction, LoaderFunction } from "@remix-run/node";
 import { json, redirect } from "@remix-run/node";
 import { Form, useCatch, useLoaderData } from "@remix-run/react";
 import invariant from "tiny-invariant";
+import {
+  getReservation,
+  Reservation,
+  getItemDetails,
+  deleteReservation,
+} from "~/models/reservation.server";
+import { requireUserId } from "~/session.server";
 
 //@ts-ignore
 const findOcc = (arr, key) => {
@@ -35,14 +42,6 @@ const findOcc = (arr, key) => {
   //@ts-ignore
   return arr2;
 };
-
-import {
-  getReservation,
-  Reservation,
-  getItemDetails,
-  deleteReservation,
-} from "~/models/reservation.server";
-import { requireUserId } from "~/session.server";
 
 type LoaderData = {
   reservation: Reservation;
