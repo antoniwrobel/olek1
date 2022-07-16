@@ -141,15 +141,15 @@ export default function NewReservationPage() {
     }
   }, [actionData]);
 
+  const [startDate, setStartDate] = useState<Date | null>();
+  const [endDate, setEndDate] = useState<Date | null>();
+
   const { availableItemParents } = useLoaderData<AvailableItemParentsType>();
 
   if (!availableItemParents?.length)
     return <div>brak sprzetu w magazynie...</div>;
 
   const tomorrow = moment().add(1, "day").toDate();
-
-  const [startDate, setStartDate] = useState<Date | null>();
-  const [endDate, setEndDate] = useState<Date | null>();
 
   const onChange = (dates: [Date | null, Date | null]) => {
     const [start, end] = dates;
