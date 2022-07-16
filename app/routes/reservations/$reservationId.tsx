@@ -1,6 +1,7 @@
 import type { ActionFunction, LoaderFunction } from "@remix-run/node";
 import { json, redirect } from "@remix-run/node";
 import { Form, useCatch, useLoaderData } from "@remix-run/react";
+import moment from "moment";
 import invariant from "tiny-invariant";
 import {
   getReservation,
@@ -113,6 +114,12 @@ export default function NoteDetailsPage() {
         <h3 className="text-2xl font-bold">
           Project Name: {data.reservation.projectName}
         </h3>
+        <p className="py-2">
+          Termin rezerwacji: <br />
+          od: {moment(data.reservation.startDate).format("DD/MM/YYYY")} do:{" "}
+          {moment(data.reservation.endDate).format("DD/MM/YYYY")}
+        </p>
+
         <p className="py-2 pb-12">Project ID: {data.reservation.projectId}</p>
         <h2 className="pb-12 text-2xl font-bold">Items borrowed:</h2>
 

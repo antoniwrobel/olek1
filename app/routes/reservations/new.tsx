@@ -7,7 +7,9 @@ import { createReservation } from "~/models/reservation.server";
 
 import type { ActionFunction, LoaderFunction } from "@remix-run/node";
 import { getAvailableItemParents } from "~/models/item.server";
-import invariant from "tiny-invariant";
+import { useState } from "react";
+import DatePicker from "react-datepicker";
+import moment from "moment";
 
 type ActionData = {
   errors?: {
@@ -53,43 +55,40 @@ export const action: ActionFunction = async ({ request }) => {
   const projectId = formData.get("projectId");
   const reservedDevices = formData.getAll("reservedDevices") as string[];
 
-  if (typeof projectName !== "string" || projectName.length === 0) {
-    return json<ActionData>(
-      { errors: { projectName: "Project name is required" } },
-      { status: 400 }
-    );
-  }
-
-  if (typeof projectId !== "string" || projectId.length === 0) {
-    return json<ActionData>(
-      { errors: { projectId: "Project ID is required" } },
-      { status: 400 }
-    );
-  }
-
-  if (typeof projectId !== "string" || projectId.length === 0) {
-    return json<ActionData>(
-      { errors: { projectId: "Project ID is required" } },
-      { status: 400 }
-    );
-  }
-
   if (typeof startDate !== "string" || startDate.length === 0) {
     return json<ActionData>(
-      { errors: { startDate: "StartDate is required" } },
+      { errors: { startDate: "stat date field is required" } },
       { status: 400 }
     );
   }
 
   if (typeof endDate !== "string" || endDate.length === 0) {
     return json<ActionData>(
-      { errors: { endDate: "EndDate is required" } },
+      { errors: { endDate: "end date field is required" } },
       { status: 400 }
     );
   }
-  if (typeof reservedDevices !== "object" || reservedDevices.length === 0) {
+
+  if (typeof projectName !== "string" || projectName.length === 0) {
     return json<ActionData>(
-      { errors: { reservedDevices: "ReservedDevices are required" } },
+      { errors: { projectName: "this field is required" } },
+      { status: 400 }
+    );
+  }
+
+  if (typeof projectId !== "string" || projectId.length === 0) {
+    return json<ActionData>(
+      { errors: { projectId: "this field is required" } },
+      { status: 400 }
+    );
+  }
+
+  if (
+    typeof reservedDevices !== "object" ||
+    !reservedDevices.some((e) => e.trim())
+  ) {
+    return json<ActionData>(
+      { errors: { reservedDevices: "this field is required" } },
       { status: 400 }
     );
   }
@@ -106,12 +105,6 @@ export const action: ActionFunction = async ({ request }) => {
     parentItems[name] = idsArray;
   });
 
-  // const ids = filteredReservedDevices.map((e) => e.split("_"));
-
-  // const flatIdsArray = ids.reduce((acc, curVal) => {
-  //   return acc.concat(curVal);
-  // }, []);
-
   const formattedStartDate = new Date(startDate);
   const formattedEndDate = new Date(endDate);
 
@@ -127,8 +120,6 @@ export const action: ActionFunction = async ({ request }) => {
   if (!reservation) return null;
 
   return redirect(`/reservations/${reservation.id}`);
-
-  return null;
 };
 
 export default function NewReservationPage() {
@@ -154,6 +145,18 @@ export default function NewReservationPage() {
 
   if (!availableItemParents?.length)
     return <div>brak sprzetu w magazynie...</div>;
+
+  const tomorrow = moment().add(1, "day").toDate();
+
+  const [startDate, setStartDate] = useState<Date | null>();
+  const [endDate, setEndDate] = useState<Date | null>();
+
+  const onChange = (dates: [Date | null, Date | null]) => {
+    const [start, end] = dates;
+
+    setStartDate(start);
+    setEndDate(end);
+  };
 
   return (
     <Form
@@ -200,10 +203,33 @@ export default function NewReservationPage() {
               </div>
             );
           })}
+          {actionData?.errors?.reservedDevices && (
+            <div className="pt-1 text-red-700" id="reservedDevices-error">
+              {actionData.errors.reservedDevices}
+            </div>
+          )}
         </div>
 
-        <label className="flex w-full flex-col gap-1">
-          <span>startDate: </span>
+        <div style={{ marginTop: "30px" }}>
+          <DatePicker
+            selected={startDate}
+            onChange={onChange}
+            startDate={startDate}
+            endDate={endDate}
+            minDate={tomorrow}
+            selectsRange
+            inline
+            calendarStartDay={1}
+          />
+          <input type="hidden" name="startDate" value={startDate?.toString()} />
+          <input type="hidden" name="endDate" value={endDate?.toString()} />
+        </div>
+
+        {/* <label
+          style={{ marginTop: "50px" }}
+          className="flex w-full flex-col gap-1"
+        >
+          <span>Od kiedy: </span>
           <input
             ref={startDateRef}
             name="startDate"
@@ -213,17 +239,22 @@ export default function NewReservationPage() {
               actionData?.errors?.startDate ? "startDate-error" : undefined
             }
           />
-        </label>
+        </label> */}
         {actionData?.errors?.startDate && (
           <div className="pt-1 text-red-700" id="startDate-error">
             {actionData.errors.startDate}
           </div>
         )}
+        {actionData?.errors?.endDate && (
+          <div className="pt-1 text-red-700" id="endDate-error">
+            {actionData.errors.endDate}
+          </div>
+        )}
       </div>
 
-      <div>
+      {/* <div>
         <label className="flex w-full flex-col gap-1">
-          <span>endDate: </span>
+          <span>Do kiedy: </span>
           <input
             ref={endDateRef}
             name="endDate"
@@ -239,11 +270,11 @@ export default function NewReservationPage() {
             {actionData.errors.endDate}
           </div>
         )}
-      </div>
+      </div> */}
 
       <div>
         <label className="flex w-full flex-col gap-1">
-          <span>projectName: </span>
+          <span>Nazwa projektu: </span>
           <input
             ref={projectNameRef}
             name="projectName"
@@ -263,7 +294,7 @@ export default function NewReservationPage() {
 
       <div>
         <label className="flex w-full flex-col gap-1">
-          <span>projectId: </span>
+          <span>ID projektu: </span>
           <input
             ref={projectIdRef}
             name="projectId"

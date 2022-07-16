@@ -18,6 +18,11 @@ export async function checkIfIsAdmin(userId: User["id"]) {
   return user?.isAdmin;
 }
 
+export async function getAllUsers() {
+  const users = await prisma.user.findMany();
+  return users;
+}
+
 export async function createUser(email: User["email"], password: string) {
   const hashedPassword = await bcrypt.hash(password, 10);
 
@@ -32,6 +37,30 @@ export async function createUser(email: User["email"], password: string) {
         },
       },
       isAdmin,
+    },
+  });
+}
+
+export async function createAdmins(admins: string[], nonAdmins: string[]) {
+  await prisma.user.updateMany({
+    where: {
+      id: {
+        in: nonAdmins,
+      },
+    },
+    data: {
+      isAdmin: false,
+    },
+  });
+
+  return prisma.user.updateMany({
+    where: {
+      id: {
+        in: admins,
+      },
+    },
+    data: {
+      isAdmin: true,
     },
   });
 }

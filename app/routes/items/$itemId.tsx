@@ -36,20 +36,18 @@ export default function NoteDetailsPage() {
 
   return (
     <div>
-      <h3 className="text-2xl font-bold">
-        ItemParentName: {data.itemParent.name}
-      </h3>
+      <h3 className="text-2xl font-bold">{data.itemParent.name}</h3>
       <p className="py-6">details: {data.itemParent.desc}</p>
       <p className="py-6">na stanie: {data.itemParent.quantity}</p>
       <hr className="my-4" />
-      <Form method="post">
+      {/* <Form method="post">
         <button
           type="submit"
           className="rounded bg-blue-500  py-2 px-4 text-white hover:bg-blue-600 focus:bg-blue-400"
         >
           Delete
         </button>
-      </Form>
+      </Form> */}
     </div>
   );
 }

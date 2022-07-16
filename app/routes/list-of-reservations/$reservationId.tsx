@@ -15,6 +15,7 @@ import {
 } from "~/models/reservation.server";
 import { getUserById } from "~/models/user.server";
 import { requireUserId } from "~/session.server";
+import moment from "moment";
 
 type LoaderData = {
   reservation: Reservation;
@@ -91,6 +92,11 @@ export default function NoteDetailsPage() {
       <h2 className="text-2xl font-bold">
         Project Name: {data.reservation.projectName}
       </h2>
+      <p className="py-2">
+        Termin rezerwacji: <br />
+        od: {moment(data.reservation.startDate).format("DD/MM/YYYY")} do:{" "}
+        {moment(data.reservation.endDate).format("DD/MM/YYYY")}
+      </p>
       <p className="py-2 pb-12">Project ID: {data.reservation.projectId}</p>
       <h2 className="pb-12 text-2xl font-bold">Items borrowed:</h2>
 

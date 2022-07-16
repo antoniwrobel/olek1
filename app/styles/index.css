@@ -1,0 +1,29 @@
+@import url("https://cdnjs.cloudflare.com/ajax/libs/react-datepicker/2.8.0/react-datepicker.min.css");
+
+table {
+  border: 1px solid lightgray;
+  min-width: 700px;
+}
+
+tbody {
+  border-bottom: 1px solid lightgray;
+}
+
+tr {
+  min-height: 50px;
+}
+
+td {
+  text-align: center;
+  padding: 10px;
+}
+
+tr td:first-of-type {
+  text-align: left;
+}
+
+th {
+  border-bottom: 1px solid lightgray;
+  border-right: 1px solid lightgray;
+  padding: 2px 4px;
+}

@@ -14,10 +14,15 @@ import {
 } from "@remix-run/react";
 
 import tailwindStylesheetUrl from "./styles/tailwind.css";
+import reactDatePickerStyles from "./styles/index.css";
+
 import { getUser } from "./session.server";
 
 export const links: LinksFunction = () => {
-  return [{ rel: "stylesheet", href: tailwindStylesheetUrl }];
+  return [
+    { rel: "stylesheet", href: tailwindStylesheetUrl },
+    { rel: "stylesheet", href: reactDatePickerStyles },
+  ];
 };
 
 export const meta: MetaFunction = () => ({
