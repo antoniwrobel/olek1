@@ -20,6 +20,62 @@ export async function deleteItemParent({ id }: { id: Item["id"] }) {
   });
 }
 
+export async function deleteItem({
+  id,
+  parentId,
+}: {
+  id: Item["id"];
+  parentId: string;
+}) {
+  await prisma.itemParent.update({
+    where: {
+      id: parentId,
+    },
+    data: {
+      quantity: {
+        decrement: 1,
+      },
+    },
+  });
+
+  return prisma.item.update({
+    where: {
+      id,
+    },
+    data: {
+      isDeleted: true,
+    },
+  });
+}
+
+export async function restoreItem({
+  id,
+  parentId,
+}: {
+  id: Item["id"];
+  parentId: string;
+}) {
+  await prisma.itemParent.update({
+    where: {
+      id: parentId,
+    },
+    data: {
+      quantity: {
+        increment: 1,
+      },
+    },
+  });
+
+  return prisma.item.update({
+    where: {
+      id,
+    },
+    data: {
+      isDeleted: false,
+    },
+  });
+}
+
 export async function getItemsList() {
   const allItemsPromise = prisma.item.findMany({
     where: {

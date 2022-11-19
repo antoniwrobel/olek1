@@ -55,18 +55,22 @@ export default function NotesPage() {
             <p className="p-4">No items yet</p>
           ) : (
             <ol>
-              {data.itemsList.allParents.map((item) => (
-                <li key={item.id}>
-                  <NavLink
-                    className={({ isActive }) =>
-                      `block border-b p-4 text-xl ${isActive ? "bg-white" : ""}`
-                    }
-                    to={item.id}
-                  >
-                    📝 {item.name}
-                  </NavLink>
-                </li>
-              ))}
+              {data.itemsList.allParents.map((item) => {
+                return (
+                  <li key={item.id}>
+                    <NavLink
+                      className={({ isActive }) =>
+                        `block border-b p-4 text-xl ${
+                          isActive ? "bg-white" : ""
+                        }`
+                      }
+                      to={item.id}
+                    >
+                      📝 {item.name}
+                    </NavLink>
+                  </li>
+                );
+              })}
             </ol>
           )}
         </div>
